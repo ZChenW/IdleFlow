@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "IdleFlow",
+  "version": "0.1.0",
+  "identifier": "dev.chakew.idle-control",
+  "build": {
+    "frontendDist": "../frontend/dist",
+    "devUrl": "http://127.0.0.1:5178",
+    "beforeDevCommand": "while [ ! -d apps/desktop/frontend ] && [ \"$PWD\" != / ]; do cd ..; done; cd apps/desktop/frontend && npm run dev",
+    "beforeBuildCommand": "while [ ! -d apps/desktop/frontend ] && [ \"$PWD\" != / ]; do cd ..; done; cd apps/desktop/frontend && npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "IdleFlow",
+        "width": 820,
+        "height": 820,
+        "minWidth": 680,
+        "minHeight": 700,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src ipc: http://ipc.localhost; img-src 'self' data:; object-src 'none'; base-uri 'self'; frame-src 'none'"
+    }
+  },
+  "bundle": {
+    "active": false,
+    "icon": []
+  }
+}

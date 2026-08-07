@@ -1,0 +1,5 @@
+[D-BUS Service]
+Name=dev.chakew.IdleControl1
+Exec=/usr/bin/env idled
+SystemdService=idled.service
+

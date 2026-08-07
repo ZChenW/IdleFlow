@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=IdleFlow
+GenericName=Idle and sleep policy
+Comment=Manage Wayland lock, display-off, and suspend profiles
+Exec=idle-control-desktop
+Icon=idle-control
+Terminal=false
+Categories=Settings;System;
+Keywords=idle;sleep;suspend;lock;wayland;

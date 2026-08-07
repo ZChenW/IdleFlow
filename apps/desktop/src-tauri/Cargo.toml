@@ -1,0 +1,24 @@
+[package]
+name = "idle-control-desktop"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Tauri v2 + React desktop client for IdleFlow"
+
+[lib]
+name = "idle_control_desktop"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[build-dependencies]
+tauri-build = { version = "2.6", features = [] }
+
+[dependencies]
+idle-control-core = { path = "../../../crates/idle-control-core" }
+idle-control-dbus = { path = "../../../crates/idle-control-dbus" }
+serde.workspace = true
+tauri = { version = "2.11", features = [] }

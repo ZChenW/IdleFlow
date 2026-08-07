@@ -1,0 +1,15 @@
+[Unit]
+Description=IdleFlow policy daemon
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=dbus
+BusName=dev.chakew.IdleControl1
+ExecStart=%h/.local/bin/idled
+Restart=on-failure
+RestartSec=2
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin
+
+[Install]
+WantedBy=default.target

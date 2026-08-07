@@ -1,0 +1,9 @@
+/target
+/apps/desktop/frontend/node_modules
+/apps/desktop/frontend/dist
+/apps/desktop/frontend/*.tsbuildinfo
+/apps/desktop/frontend/vite.config.js
+/apps/desktop/frontend/vite.config.d.ts
+/apps/desktop/src-tauri/gen
+.impeccable/
+*.log
