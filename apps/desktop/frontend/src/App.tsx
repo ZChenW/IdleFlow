@@ -13,6 +13,8 @@ import {
 
 type ProfileKey = 'battery' | 'ac';
 type StageKey = 'lock' | 'display' | 'suspend';
+type ProfileInputValues = Record<StageKey, string>;
+type PolicyInputValues = Record<ProfileKey, ProfileInputValues>;
 
 function previewNotice(): string | null {
   const notice = new URLSearchParams(window.location.search).get('notice');
@@ -106,6 +108,21 @@ function updatePolicyValue(profile: Profile, stage: StageKey, seconds: number): 
   return { ...profile, suspend_after_seconds: seconds };
 }
 
+function inputValuesForProfile(profile: Profile): ProfileInputValues {
+  return {
+    lock: String(minutes(profile.lock_after_seconds)),
+    display: String(minutes(profile.display_off_after_seconds)),
+    suspend: profile.suspend_after_seconds === null ? '' : String(minutes(profile.suspend_after_seconds)),
+  };
+}
+
+function inputValuesForPolicy(policy: Policy): PolicyInputValues {
+  return {
+    battery: inputValuesForProfile(policy.battery),
+    ac: inputValuesForProfile(policy.ac),
+  };
+}
+
 function PixelSwitch({
   checked,
   onChange,
@@ -134,12 +151,14 @@ function PixelSwitch({
 function PolicyDial({
   profile,
   profileKey,
+  inputValues,
   selectedStage,
   onSelectStage,
   onToggleProfile,
 }: {
   profile: Profile;
   profileKey: ProfileKey;
+  inputValues: ProfileInputValues;
   selectedStage: StageKey;
   onSelectStage: (stage: StageKey) => void;
   onToggleProfile: () => void;
@@ -161,6 +180,12 @@ function PolicyDial({
 
       {(['lock', 'display', 'suspend'] as StageKey[]).map((stage) => {
         const value = values[stage];
+        const displayValue = value === null ? '—' : inputValues[stage];
+        const valueLabel = value === null
+          ? '已关闭'
+          : displayValue === ''
+            ? '等待输入'
+            : `${displayValue} 分钟`;
         return (
           <button
             key={stage}
@@ -168,11 +193,11 @@ function PolicyDial({
             className={`dial-node ${stage} ${selectedStage === stage ? 'selected' : ''} ${value === null ? 'dormant' : ''}`}
             onClick={() => onSelectStage(stage)}
             aria-pressed={selectedStage === stage}
-            aria-label={`${stageMeta[stage].label}，${value === null ? '已关闭' : `${minutes(value)} 分钟`}`}
+            aria-label={`${stageMeta[stage].label}，${valueLabel}`}
           >
             <StageIcon stage={stage} />
             <strong>{stageMeta[stage].label}</strong>
-            <span>{value === null ? '—' : minutes(value)}</span>
+            <span>{displayValue}</span>
             <small>{value === null ? '关闭' : '分钟'}</small>
           </button>
         );
@@ -195,18 +220,29 @@ function RouteStage({
   stage,
   profile,
   selected,
+  inputValue,
   onSelect,
+  onInputValueChange,
   onChange,
 }: {
   stage: StageKey;
   profile: Profile;
   selected: boolean;
+  inputValue: string;
   onSelect: () => void;
+  onInputValueChange: (value: string) => void;
   onChange: (profile: Profile) => void;
 }) {
   const value = policyValue(profile, stage);
   const isSuspend = stage === 'suspend';
   const enabled = value !== null;
+
+  const resetInvalidInput = () => {
+    const parsed = Number(inputValue);
+    if (inputValue.trim() === '' || !Number.isFinite(parsed) || parsed < 0) {
+      onInputValueChange(value === null ? '' : String(minutes(value)));
+    }
+  };
 
   return (
     <div className={`route-stage ${selected ? 'selected' : ''} ${!enabled ? 'dormant' : ''}`}>
@@ -224,11 +260,19 @@ function RouteStage({
         <span className="sr-only">{stageMeta[stage].label}等待分钟数</span>
         <input
           type="number"
-          min="1"
+          min="0"
           disabled={!enabled}
-          value={value === null ? '' : minutes(value)}
+          value={inputValue}
           onFocus={onSelect}
-          onChange={(event) => onChange(updatePolicyValue(profile, stage, fromMinutes(Number(event.target.value))))}
+          onBlur={resetInvalidInput}
+          onChange={(event) => {
+            const nextInput = event.target.value;
+            onInputValueChange(nextInput);
+            const parsed = Number(nextInput);
+            if (nextInput.trim() !== '' && Number.isFinite(parsed) && parsed >= 0) {
+              onChange(updatePolicyValue(profile, stage, fromMinutes(parsed)));
+            }
+          }}
         />
         <small>{enabled ? 'MIN' : 'OFF'}</small>
       </label>
@@ -237,14 +281,16 @@ function RouteStage({
         <PixelSwitch
           checked={enabled}
           label={enabled ? '挂起已启用' : '挂起已关闭'}
-          onChange={(checked) =>
+          onChange={(checked) => {
+            const nextValue = checked
+              ? Math.max(profile.display_off_after_seconds + 60, 30 * 60)
+              : null;
+            onInputValueChange(nextValue === null ? '' : String(minutes(nextValue)));
             onChange({
               ...profile,
-              suspend_after_seconds: checked
-                ? Math.max(profile.display_off_after_seconds + 60, 30 * 60)
-                : null,
-            })
-          }
+              suspend_after_seconds: nextValue,
+            });
+          }}
         />
       )}
     </div>
@@ -255,17 +301,21 @@ function RouteRow({
   profileKey,
   profile,
   active,
+  inputValues,
   selectedStage,
   onActivate,
   onSelectStage,
+  onInputValueChange,
   onChange,
 }: {
   profileKey: ProfileKey;
   profile: Profile;
   active: boolean;
+  inputValues: ProfileInputValues;
   selectedStage: StageKey;
   onActivate: () => void;
   onSelectStage: (stage: StageKey) => void;
+  onInputValueChange: (stage: StageKey, value: string) => void;
   onChange: (profile: Profile) => void;
 }) {
   const sourceLabel = profileKey === 'battery' ? '电池' : '交流电';
@@ -295,7 +345,9 @@ function RouteRow({
             stage={stage}
             profile={profile}
             selected={active && selectedStage === stage}
+            inputValue={inputValues[stage]}
             onSelect={() => { onActivate(); onSelectStage(stage); }}
+            onInputValueChange={(value) => onInputValueChange(stage, value)}
             onChange={onChange}
           />
         ))}
@@ -318,6 +370,7 @@ function LoadingScreen({ message, onRetry }: { message: string | null; onRetry: 
 export default function App() {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [draft, setDraft] = useState<Policy | null>(null);
+  const [inputValues, setInputValues] = useState<PolicyInputValues | null>(null);
   const [profileKey, setProfileKey] = useState<ProfileKey>('battery');
   const [selectedStage, setSelectedStage] = useState<StageKey>('lock');
   const [busy, setBusy] = useState(false);
@@ -328,6 +381,7 @@ export default function App() {
       const next = await api.snapshot();
       setSnapshot(next);
       setDraft(next.policy);
+      setInputValues(inputValuesForPolicy(next.policy));
       setMessage(previewNotice());
     } catch (error) {
       setMessage(`无法连接 idled。请确认用户服务正在运行，然后重试。\n${String(error)}`);
@@ -345,6 +399,7 @@ export default function App() {
       const next = await operation();
       setSnapshot(next);
       setDraft(next.policy);
+      setInputValues(inputValuesForPolicy(next.policy));
       setMessage(success);
     } catch (error) {
       setMessage(`操作未完成：${String(error)}`);
@@ -363,7 +418,7 @@ export default function App() {
     return JSON.stringify(draft) !== JSON.stringify(snapshot.policy);
   }, [draft, snapshot]);
 
-  if (!snapshot || !draft) {
+  if (!snapshot || !draft || !inputValues) {
     return <LoadingScreen message={message} onRetry={() => void refresh()} />;
   }
 
@@ -376,6 +431,13 @@ export default function App() {
 
   const setProfile = (key: ProfileKey, profile: Profile) => {
     setDraft({ ...draft, [key]: profile });
+  };
+
+  const setStageInputValue = (key: ProfileKey, stage: StageKey, value: string) => {
+    setInputValues((current) => current === null ? current : {
+      ...current,
+      [key]: { ...current[key], [stage]: value },
+    });
   };
 
   return (
@@ -449,7 +511,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="window-frame policy-window" key={profileKey}>
+        <section className="window-frame policy-window">
           <WindowTitleBar title="IDLE POLICY" />
           <div className="policy-workspace">
             <div className="workspace-heading">
@@ -474,6 +536,7 @@ export default function App() {
               <PolicyDial
                 profile={currentProfile}
                 profileKey={profileKey}
+                inputValues={inputValues[profileKey]}
                 selectedStage={selectedStage}
                 onSelectStage={setSelectedStage}
                 onToggleProfile={() => setProfileKey(profileKey === 'battery' ? 'ac' : 'battery')}
@@ -487,18 +550,22 @@ export default function App() {
                   profileKey="battery"
                   profile={draft.battery}
                   active={profileKey === 'battery'}
+                  inputValues={inputValues.battery}
                   selectedStage={selectedStage}
                   onActivate={() => setProfileKey('battery')}
                   onSelectStage={setSelectedStage}
+                  onInputValueChange={(stage, value) => setStageInputValue('battery', stage, value)}
                   onChange={(profile) => setProfile('battery', profile)}
                 />
                 <RouteRow
                   profileKey="ac"
                   profile={draft.ac}
                   active={profileKey === 'ac'}
+                  inputValues={inputValues.ac}
                   selectedStage={selectedStage}
                   onActivate={() => setProfileKey('ac')}
                   onSelectStage={setSelectedStage}
+                  onInputValueChange={(stage, value) => setStageInputValue('ac', stage, value)}
                   onChange={(profile) => setProfile('ac', profile)}
                 />
               </div>

@@ -7,7 +7,8 @@
     "dev": "vite --host 127.0.0.1 --port 5178",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
-    "test": "node --test src/model.test.ts"
+    "test": "node --test src/model.test.ts",
+    "test:ui": "node scripts/ui-regression.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.11.0",

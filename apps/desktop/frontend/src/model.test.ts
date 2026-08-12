@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { statusLabel, validateProfile } from './model.ts';
+import { fromMinutes, statusLabel, validateProfile } from './model.ts';
 
 test('observe-only status identifies the existing idle owner', () => {
   assert.equal(
@@ -26,4 +26,8 @@ test('profile validation rejects display-off before lock', () => {
     }),
     '熄屏时间必须晚于锁屏时间',
   );
+});
+
+test('zero minutes remains visible as an invalid draft value', () => {
+  assert.equal(fromMinutes(0), 0);
 });

@@ -56,5 +56,5 @@ export function minutes(seconds: number): number {
 }
 
 export function fromMinutes(value: number): number {
-  return Math.max(1, Math.round(value)) * 60;
+  return Math.max(0, Math.round(value)) * 60;
 }
