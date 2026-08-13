@@ -1,33 +1,32 @@
 ---
 name: IdleFlow
-description: An editorial policy desk for safe, legible Linux idle control.
+description: A compact monochrome policy console for Linux idle control.
 colors:
-  ink: "#0a0a0a"
-  paper: "#f4f4f0"
+  ink: "#000000"
+  blackbar: "#0a0a0a"
+  paper: "#f7f7f5"
   white: "#ffffff"
-  muted-ink: "#5b5b56"
-  soft-ink: "#7a7a73"
-  rule: "#b7b7b0"
-  wash: "#e8e8e2"
+  muted: "#737373"
+  soft: "#a3a3a3"
+  line: "#e5e5e5"
+  rule: "#d4d4d4"
   danger: "#8f1d1d"
-  danger-wash: "#f1dddd"
 typography:
   display:
-    fontFamily: "Noto Sans ExtraCondensed, sans-serif"
-    fontSize: "clamp(4rem, 12vw, 6rem)"
+    fontFamily: "Noto Sans CJK SC, system-ui, sans-serif"
+    fontSize: "52px"
     fontWeight: 900
-    lineHeight: 0.78
-    letterSpacing: "-0.04em"
+    lineHeight: 0.9
+    letterSpacing: "-0.03em"
   headline:
     fontFamily: "Noto Sans CJK SC, system-ui, sans-serif"
-    fontSize: "clamp(28px, 3vw, 44px)"
-    fontWeight: 820
-    lineHeight: 0.95
-    letterSpacing: "-0.04em"
+    fontSize: "20px"
+    fontWeight: 700
+    lineHeight: 1.25
   body:
     fontFamily: "Noto Sans CJK SC, system-ui, sans-serif"
-    fontSize: "12px"
-    lineHeight: 1.55
+    fontSize: "13px"
+    lineHeight: 1.5
   data:
     fontFamily: "Maple Mono, monospace"
     fontWeight: 600
@@ -35,118 +34,72 @@ typography:
 rounded:
   square: "0"
 spacing:
-  gutter: "clamp(16px, 2vw, 30px)"
+  window: "960px"
+  inset: "32px"
   compact: "8px"
-  section: "18px"
 components:
   button-primary:
     backgroundColor: "{colors.ink}"
-    textColor: "{colors.paper}"
+    textColor: "{colors.white}"
     rounded: "{rounded.square}"
-    padding: "14px 20px"
-    height: "94px"
+    height: "40px"
   input-minute:
-    backgroundColor: "{colors.paper}"
+    backgroundColor: "{colors.white}"
     textColor: "{colors.ink}"
     typography: "{typography.data}"
     rounded: "{rounded.square}"
-    height: "56px"
+    width: "80px"
+    height: "48px"
 ---
 
 # Design System: IdleFlow
 
 ## Overview
 
-**Creative North Star: "The Policy Desk"**
+**Creative North Star: “The Compact Policy Console”**
 
-IdleFlow behaves like an independent modernist technical periodical made operational: one warm paper field, decisive black rules, oversized identity, and compact data notation. Hierarchy comes from type scale, inversion, and spatial order—not cards or ornament. Expression must never obscure ownership, stage order, action availability, or the lock-before-suspend safety invariant.
-
-**Key Characteristics:**
-
-- Oversized extra-condensed masthead
-- Warm neutral paper and black ink
-- Square controls and one-pixel rules
-- Monospaced measurements and labels
-- Ordered dual policy timelines
-- Restrained, structural motion
+IdleFlow is a centered 960px desktop utility, not a dashboard or document. A black title bar frames a compact strategy editor: a narrow power-mode rail, two equal timelines, and one low action bar. The interface stays monochrome, square, and deliberately quiet so timing order is immediately legible.
 
 ## Colors
 
-The palette is nearly monochrome: paper and ink carry the system, cool neutrals separate states, and red appears only for actionable failure.
-
-- **Policy Ink** (`#0a0a0a`): text, structural rules, active marks, and primary actions.
-- **Editorial Paper** (`#f4f4f0`): the continuous application field.
-- **Ledger Rule** (`#b7b7b0`): subordinate divisions and dotted facts.
-- **Selection Wash** (`#e8e8e2`): selected editing regions without elevation.
-- **Failure Red** (`#8f1d1d`) / **Failure Wash** (`#f1dddd`): error copy and its flat background.
-
-**The Ink Economy Rule.** Use solid black fields only for ownership, active selection, or the primary action; their rarity creates leverage.
+- **Ink** (`#000`): active routes, controls, text, and primary action.
+- **Black Bar** (`#0a0a0a`): the application title bar only.
+- **Paper** (`#f7f7f5`): main editing surface.
+- **White** (`#fff`): input and footer surfaces.
+- **Muted / Soft** (`#737373` / `#a3a3a3`): annotations and inactive policy mode.
+- **Line / Rule** (`#e5e5e5` / `#d4d4d4`): structural separation and inactive routes.
+- **Failure Red** (`#8f1d1d`): actionable errors only.
 
 ## Typography
 
-**Display Font:** Noto Sans ExtraCondensed Black, self-hosted.
-
-**Body Font:** Noto Sans CJK SC with system sans fallbacks.
-
-**Data Font:** Maple Mono SemiBold, self-hosted.
-
-The display face supplies the masthead's editorial authority. Body CJK remains practical and highly legible. Maple Mono is reserved for measurements, English stage codes, process data, and terse labels—not general prose.
-
-- **Display** (900, `clamp(4rem, 12vw, 6rem)`, .78): `IDLEFLOW` and loading identity only.
-- **Headline** (820, `clamp(28px, 3vw, 44px)`, .95): primary policy title.
-- **Title** (750–820, 15–40px): rail statements, profile names, section titles.
-- **Body** (10–12px, 1.45–1.55): operational explanation and recovery copy.
-- **Data/Label** (600, 7–13px): minutes, status facts, stage codes, and index notation.
-
-**The Measurement Rule.** Maple Mono denotes machine-readable facts; using it as decorative body type weakens the interface.
+The wide, heavy CJK-capable sans carries the `IDLEFLOW` wordmark and interface copy. Maple Mono is reserved for minute values. The hierarchy is intentionally compact: 52px identity, 20px policy title, 13px controls, and 9–10px route notation.
 
 ## Layout
 
-Desktop uses an editorial masthead followed directly by a full-width policy sheet. Refresh occupies the masthead's top-right support position, while operational status and maintenance controls stay outside this deliberately focused editing surface. The policy sheet gives both power profiles equal horizontal timelines. The responsive system changes at 900px, 680px, and 460px: timeline density reduces first, then labels simplify, and finally policy regions stack. The reading order stays policy → profiles → save. The outer gutter is `clamp(16px, 2vw, 30px)`.
-
-## Elevation & Depth
-
-There are no shadows, glass, blur, or raised containers. Depth is expressed through black/white inversion, line weight, selection wash, and whitespace. Overlays are not part of this surface.
-
-**The Flat Ledger Rule.** A new surface joins the ruled field; it does not float above it.
-
-## Shapes
-
-Corners are square. Structural divisions use one-pixel rules; two pixels are reserved for keyboard focus or selected emphasis. Circles are not a container language. Small square marks indicate status, timeline stops, and saved/dirty state. Icons use consistent authored 24×24 line geometry with square caps and miter joins.
+At desktop widths the app is a centered `960px` window on a subtle 24px technical grid. The title bar is `64px`, policy heading `104px`, power rail `80px`, each policy row `178px`, and action bar at least `56px`. Battery and AC remain simultaneously visible; the active mode uses ink while the inactive mode recedes in gray. Below `820px`, insets and controls compress. Below `560px`, the window fills the viewport while preserving the two-timeline comparison.
 
 ## Components
 
-### Buttons
+### Title Bar
 
-- **Primary:** a large ink field with paper text, square corners, and no shadow.
-- **Secondary:** transparent paper with a one-pixel ink rule; hover inverts ink and paper.
-- **Focus:** a two-pixel ink outline with three-pixel offset.
-- **Disabled:** retains geometry at 42% opacity.
+A solid black strip holds the white wordmark and a compact refresh action. Refresh success and failures appear in the ruled notice row below the policy heading.
 
-### Inputs / Fields
+### Mode Rail
 
-Minute inputs are square two-cell ledgers: a large centered tabular value plus a narrow `MIN/OFF` unit cell. Focus draws inside the field so the timeline geometry does not jump. Disabled fields use the selection wash and muted ink.
+Battery and AC occupy equal vertical tabs. A three-pixel ink marker and full-opacity row identify the active editing context without hiding the other policy.
 
 ### Policy Timeline
 
-The signature module presents battery and AC as equal ordered routes. Each route uses one continuous axis, square stops, explicit stage names, editable minute fields, and an arrowhead. Selection may add a wash and rule without interrupting the axis.
+Each row uses three equal stages, a continuous arrowed rule, value-positioned square range handles, dashed input connectors, stage labels, and 80×48 minute inputs. Range and number controls stay synchronized, and focus activates the power mode. Suspend alone adds the on/off control.
 
-### Notices
+### Action Bar
 
-Notices remain flat ruled rows. Errors alone use Failure Red and Failure Wash; success stays in the neutral palette.
+Inhibitor behavior stays visible at left. The single primary action is a compact black `保存策略` button at right; its disabled state truthfully indicates there are no valid unsaved changes.
 
-## Do's and Don'ts
+## Rules
 
-### Do:
-
-- **Do** keep operational state and actions readable within seconds.
-- **Do** use one-pixel rules to organize the continuous paper field.
-- **Do** preserve square geometry, tabular numerals, and semantic controls.
-- **Do** provide reduced-motion behavior for the timeline reveal.
-
-### Don't:
-
-- **Don't** introduce rounded cards, bento grids, gradients, glass, or decorative shadows.
-- **Don't** use Maple Mono for general prose or Noto Sans ExtraCondensed for body copy.
-- **Don't** hide ownership, inhibitor state, validation, or lock safety behind decoration.
-- **Don't** replace the live masthead, icons, or timeline geometry with raster UI chrome.
+- Keep corners square and use one-pixel lines for structure.
+- Keep both power profiles visible for direct comparison.
+- Use opacity only to distinguish inactive policy context, never to conceal it.
+- Preserve real validation, raw input, refresh notices, and reduced-motion behavior.
+- Do not restore status dashboards, maintenance controls, cards, shadows, or decorative color.

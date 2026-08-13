@@ -12,7 +12,7 @@ Linux desktop users on Wayland who want one dependable place to inspect, edit, a
 
 ## Product Purpose
 
-IdleFlow makes desktop idle policy legible and controllable. Success means a user can see who currently owns idle behavior, tune battery and AC timelines, save or take over deliberately, temporarily inhibit automation, verify locking, and safely return control to the prior policy.
+IdleFlow makes desktop idle policy legible and controllable. The current editor succeeds when a user can compare battery and AC timelines, adjust their ordered stages, and save a valid policy without changing ownership.
 
 ## Positioning
 
@@ -27,29 +27,27 @@ IdleFlow treats idle behavior as an ordered policy with explicit ownership and a
 
 ## Capabilities and Constraints
 
-- Shows daemon status, ownership, active power source, inhibition, and managed process identity.
 - Edits battery and AC idle policy in minutes and validates stage ordering before saving.
-- Can take over from an existing policy, inhibit or resume actions, test locking, and roll back ownership.
+- The service supports takeover, inhibition, lock testing, and rollback, but these maintenance controls are intentionally outside the focused policy editor.
 - Locking must succeed before automatic suspend; QuickShell is preferred and `swaylock` is the fallback.
-- Existing product behavior, Chinese interface copy, and Tauri/Rust/React stack remain intact during the editorial redesign.
+- Chinese interface copy and the Tauri/Rust/React stack remain intact during visual changes.
 
 ## Brand Commitments
 
 - Product name: IdleFlow.
-- The interface uses Wallpaper Console's Editorial implementation as its binding visual reference: oversized typographic identity, strict black rules, square controls, warm neutral paper, dense index notation, and restrained motion.
-- Product truth stays operational and precise; the editorial treatment must not obscure state or familiar controls.
+- The interface uses `kimi/idleflow_optimized.html` as its binding visual reference: a compact 960px window, black application bar, narrow mode rail, dual timelines, square controls, and restrained motion.
+- Product truth stays operational and precise; the compact treatment must not obscure validation, active editing context, or save state.
 
 ## Evidence on Hand
 
 - Product behavior and copy: `apps/desktop/frontend/src/App.tsx`.
 - Policy model and validation: `apps/desktop/frontend/src/model.ts` and `apps/desktop/frontend/src/model.test.ts`.
 - System architecture and safety constraints: `docs/architecture.md` and `README.md`.
-- Binding visual reference: `/home/chakew/Projects/wallpaper-console-rust/apps/tauri-gui/frontend/src/styles/editorialTheme.css`.
+- Binding visual reference: `kimi/idleflow_optimized.html`.
 - No testimonials, benchmarks, customer claims, or commercial proof are present and none should be fabricated.
 
 ## Product Principles
 
-- Make ownership visible before offering control.
 - Present idle actions as one ordered policy.
 - Preserve lock-before-suspend safety.
 - Keep changes deliberate, reversible, and attributable.

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 
 import { api } from './api';
 import {
@@ -132,6 +132,19 @@ function policyValue(profile: Profile, stage: StageKey): number | null {
   return profile.suspend_after_seconds;
 }
 
+const sliderBounds: Record<ProfileKey, Record<StageKey, { min: number; max: number; step: number }>> = {
+  battery: {
+    lock: { min: 1, max: 30, step: 1 },
+    display: { min: 1, max: 60, step: 1 },
+    suspend: { min: 5, max: 120, step: 1 },
+  },
+  ac: {
+    lock: { min: 1, max: 240, step: 5 },
+    display: { min: 1, max: 300, step: 5 },
+    suspend: { min: 5, max: 480, step: 5 },
+  },
+};
+
 function Toggle({ checked, onChange, label, disabled = false }: {
   checked: boolean;
   onChange: (checked: boolean) => void;
@@ -153,6 +166,7 @@ function Toggle({ checked, onChange, label, disabled = false }: {
 }
 
 function TimelineStage({
+  profileKey,
   stage,
   profile,
   selected,
@@ -162,6 +176,7 @@ function TimelineStage({
   onInputBlur,
   onToggleSuspend,
 }: {
+  profileKey: ProfileKey;
   stage: StageKey;
   profile: Profile;
   selected: boolean;
@@ -174,9 +189,14 @@ function TimelineStage({
   const value = policyValue(profile, stage);
   const isSuspend = stage === 'suspend';
   const enabled = value !== null;
+  const bounds = sliderBounds[profileKey][stage];
+  const minutesValue = value === null ? bounds.min : Math.round(value / 60);
+  const normalized = Math.min(1, Math.max(0, (minutesValue - bounds.min) / (bounds.max - bounds.min)));
+  const nodePosition = 15 + normalized * 70;
+  const stageStyle = { '--node-position': `${nodePosition}%` } as CSSProperties;
 
   return (
-    <div className={`route-stage ${selected ? 'selected' : ''} ${!enabled ? 'dormant' : ''}`}>
+    <div className={`route-stage ${selected ? 'selected' : ''} ${!enabled ? 'dormant' : ''}`} style={stageStyle}>
       <button className="stage-name" type="button" onClick={onSelect} aria-pressed={selected}>
         <span className="stage-index" aria-hidden="true">0{stages.indexOf(stage) + 1}</span>
         <StageIcon stage={stage} />
@@ -185,6 +205,20 @@ function TimelineStage({
           <small>{stageMeta[stage].english}</small>
         </span>
       </button>
+
+      <input
+        className="stage-slider"
+        type="range"
+        min={bounds.min}
+        max={bounds.max}
+        step={bounds.step}
+        disabled={!enabled}
+        value={Math.min(bounds.max, Math.max(bounds.min, minutesValue))}
+        aria-label={`${profileKey === 'battery' ? '电池' : '交流电'}模式${stageMeta[stage].label}时间`}
+        onFocus={onSelect}
+        onChange={(event) => onInputValueChange(event.target.value)}
+      />
+      <i className="stage-connector" aria-hidden="true" />
 
       <label className="minute-field">
         <span className="sr-only">{stageMeta[stage].label}等待分钟数</span>
@@ -236,7 +270,6 @@ function PolicyTimeline({
   onToggleSuspend: (enabled: boolean) => void;
 }) {
   const sourceLabel = profileKey === 'battery' ? '电池' : '交流电';
-  const englishLabel = profileKey === 'battery' ? 'ON BATTERY' : 'PLUGGED IN';
 
   return (
     <section
@@ -244,16 +277,11 @@ function PolicyTimeline({
       aria-label={`${sourceLabel}策略`}
       onFocusCapture={onActivate}
     >
-      <button className="route-source" type="button" onClick={onActivate} aria-pressed={active}>
-        <span className="source-icon">{profileKey === 'battery' ? <BatteryIcon /> : <PlugIcon />}</span>
-        <span><strong>{sourceLabel}</strong><small>{englishLabel}</small></span>
-        <i aria-hidden="true" />
-      </button>
-
       <div className="route-stages">
         {stages.map((stage) => (
           <TimelineStage
             key={stage}
+            profileKey={profileKey}
             stage={stage}
             profile={profile}
             selected={active && selectedStage === stage}
@@ -365,44 +393,64 @@ export default function App() {
             </aside>
           )}
 
-          <div className="timeline-scale" aria-hidden="true">
-            <span>策略 / 分钟</span>
-            <div><b>LOCK</b><b>DISPLAY</b><b>SUSPEND</b></div>
-          </div>
+          <div className="strategy-shell">
+            <nav className="mode-sidebar" aria-label="电源模式">
+              <button
+                className={`mode-tab ${profileKey === 'battery' ? 'active' : ''}`}
+                type="button"
+                onClick={() => setProfileKey('battery')}
+                aria-pressed={profileKey === 'battery'}
+              >
+                <BatteryIcon />
+                <strong>电池</strong>
+                <small>ON BATTERY</small>
+              </button>
+              <button
+                className={`mode-tab ${profileKey === 'ac' ? 'active' : ''}`}
+                type="button"
+                onClick={() => setProfileKey('ac')}
+                aria-pressed={profileKey === 'ac'}
+              >
+                <PlugIcon />
+                <strong>交流电</strong>
+                <small>PLUGGED IN</small>
+              </button>
+            </nav>
 
-          <div className="policy-timelines">
-            <PolicyTimeline
-              profileKey="battery"
-              profile={draft.battery}
-              active={profileKey === 'battery'}
-              inputValues={inputValues.battery}
-              selectedStage={selectedStage}
-              onActivate={() => setProfileKey('battery')}
-              onSelectStage={setSelectedStage}
-              onInputValueChange={(stage, input) => editPolicy({
-                type: 'stage-input', profile: 'battery', stage, input,
-              })}
-              onInputBlur={(stage) => editPolicy({ type: 'stage-blur', profile: 'battery', stage })}
-              onToggleSuspend={(enabled) => editPolicy({
-                type: 'suspend-toggle', profile: 'battery', enabled,
-              })}
-            />
-            <PolicyTimeline
-              profileKey="ac"
-              profile={draft.ac}
-              active={profileKey === 'ac'}
-              inputValues={inputValues.ac}
-              selectedStage={selectedStage}
-              onActivate={() => setProfileKey('ac')}
-              onSelectStage={setSelectedStage}
-              onInputValueChange={(stage, input) => editPolicy({
-                type: 'stage-input', profile: 'ac', stage, input,
-              })}
-              onInputBlur={(stage) => editPolicy({ type: 'stage-blur', profile: 'ac', stage })}
-              onToggleSuspend={(enabled) => editPolicy({
-                type: 'suspend-toggle', profile: 'ac', enabled,
-              })}
-            />
+            <div className="policy-timelines">
+              <PolicyTimeline
+                profileKey="battery"
+                profile={draft.battery}
+                active={profileKey === 'battery'}
+                inputValues={inputValues.battery}
+                selectedStage={selectedStage}
+                onActivate={() => setProfileKey('battery')}
+                onSelectStage={setSelectedStage}
+                onInputValueChange={(stage, input) => editPolicy({
+                  type: 'stage-input', profile: 'battery', stage, input,
+                })}
+                onInputBlur={(stage) => editPolicy({ type: 'stage-blur', profile: 'battery', stage })}
+                onToggleSuspend={(enabled) => editPolicy({
+                  type: 'suspend-toggle', profile: 'battery', enabled,
+                })}
+              />
+              <PolicyTimeline
+                profileKey="ac"
+                profile={draft.ac}
+                active={profileKey === 'ac'}
+                inputValues={inputValues.ac}
+                selectedStage={selectedStage}
+                onActivate={() => setProfileKey('ac')}
+                onSelectStage={setSelectedStage}
+                onInputValueChange={(stage, input) => editPolicy({
+                  type: 'stage-input', profile: 'ac', stage, input,
+                })}
+                onInputBlur={(stage) => editPolicy({ type: 'stage-blur', profile: 'ac', stage })}
+                onToggleSuspend={(enabled) => editPolicy({
+                  type: 'suspend-toggle', profile: 'ac', enabled,
+                })}
+              />
+            </div>
           </div>
 
           <footer className="policy-actions">
@@ -411,22 +459,19 @@ export default function App() {
               <span><strong>遵守应用 inhibitor</strong><small>演示、媒体播放和会议可以延后空闲动作</small></span>
               <span className="fixed-state">固定启用</span>
             </div>
-            <button
-              className="save-button"
-              disabled={busy || validation !== null || !hasChanges}
-              onClick={() => void run(() => api.save(draft), '策略已保存。所有权状态没有改变。')}
-            >
-              <span className="save-mark" aria-hidden="true" />
-              <span><strong>保存策略</strong><small>保存但不改变所有权</small></span>
-            </button>
+            <div className="save-control">
+              <span>保存但不改变所有权</span>
+              <button
+                className="save-button"
+                disabled={busy || validation !== null || !hasChanges}
+                onClick={() => void run(() => api.save(draft), '策略已保存。所有权状态没有改变。')}
+              >
+                保存策略
+              </button>
+            </div>
           </footer>
         </section>
       </div>
-
-      <footer className="app-footer">
-        <span>IdleFlow / Policy desk</span>
-        <span>锁屏优先 · 可逆接管 · 尊重 inhibitors</span>
-      </footer>
     </main>
   );
 }
