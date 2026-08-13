@@ -35,7 +35,7 @@ IdleFlow treats idle behavior as an ordered policy with explicit ownership and a
 ## Brand Commitments
 
 - Product name: IdleFlow.
-- The interface uses `kimi/idleflow_optimized.html` as its binding visual reference: a compact 960px window, black application bar, narrow mode rail, dual timelines, square controls, and restrained motion.
+- The interface uses `kimi/idleflow_optimized.html` as its binding visual reference: a full-window compact console, black application bar, narrow mode rail, dual timelines, square controls, and restrained motion.
 - Product truth stays operational and precise; the compact treatment must not obscure validation, active editing context, or save state.
 
 ## Evidence on Hand

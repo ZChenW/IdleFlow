@@ -40,21 +40,16 @@
 
 * { box-sizing: border-box; border-radius: 0; }
 
-html { min-width: 320px; min-height: 100%; background: #ededeb; }
+html,
+body,
+#root { min-width: 320px; min-height: 100%; }
 
 body {
-  display: grid;
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
-  padding: 24px 16px;
-  place-items: center;
   color: var(--ink-soft);
-  background:
-    linear-gradient(#ededeb 1px, transparent 1px),
-    linear-gradient(90deg, #ededeb 1px, transparent 1px),
-    #f1f1ef;
-  background-size: 24px 24px;
+  background: var(--paper);
 }
 
 button,
@@ -107,9 +102,12 @@ input[type="number"]::-webkit-outer-spin-button { margin: 0; appearance: none; }
 }
 
 .app-shell {
-  width: min(960px, calc(100vw - 32px));
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  flex-direction: column;
   overflow: hidden;
-  border: 1px solid #bebeba;
   background: var(--paper);
 }
 
@@ -151,8 +149,8 @@ input[type="number"]::-webkit-outer-spin-button { margin: 0; appearance: none; }
 
 .refresh-button:hover:not(:disabled) { opacity: .6; }
 .refresh-button:active:not(:disabled) { transform: translateY(1px); }
-.editorial-grid { display: block; }
-.policy-sheet { min-width: 0; }
+.editorial-grid { display: flex; min-height: 0; flex: 1; }
+.policy-sheet { display: flex; min-width: 0; flex: 1; flex-direction: column; }
 
 .policy-heading {
   display: flex;
@@ -228,11 +226,15 @@ input[type="number"]::-webkit-outer-spin-button { margin: 0; appearance: none; }
 
 .strategy-shell {
   display: grid;
+  min-height: 356px;
   grid-template-columns: 80px minmax(0, 1fr);
+  flex: 1;
   background: var(--paper);
 }
 
 .mode-sidebar {
+  display: grid;
+  grid-template-rows: repeat(2, minmax(178px, 1fr));
   border-inline-end: 1px solid var(--line);
   background: #f4f4f2;
 }
@@ -241,7 +243,7 @@ input[type="number"]::-webkit-outer-spin-button { margin: 0; appearance: none; }
   position: relative;
   display: flex;
   width: 100%;
-  height: 178px;
+  min-height: 178px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -265,10 +267,16 @@ input[type="number"]::-webkit-outer-spin-button { margin: 0; appearance: none; }
 .mode-tab strong { font-size: 14px; line-height: 1.1; }
 .mode-tab small { color: currentColor; font-size: 9px; font-weight: 600; letter-spacing: .08em; line-height: 1.2; white-space: nowrap; }
 
-.policy-timelines { min-width: 0; }
+.policy-timelines {
+  display: grid;
+  min-width: 0;
+  grid-template-rows: repeat(2, minmax(178px, 1fr));
+}
 
 .route-row {
-  height: 178px;
+  display: flex;
+  min-height: 178px;
+  align-items: center;
   padding: 20px 28px 15px;
   border-bottom: 1px solid var(--line);
   background: var(--paper);
@@ -283,6 +291,7 @@ input[type="number"]::-webkit-outer-spin-button { margin: 0; appearance: none; }
 .route-stages {
   position: relative;
   display: grid;
+  width: 100%;
   height: 143px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -502,8 +511,6 @@ input[type="number"]::-webkit-outer-spin-button { margin: 0; appearance: none; }
 @keyframes cross-fade { from { opacity: .25; transform: translateY(2px); } }
 
 @media (max-width: 820px) {
-  body { padding: 12px; }
-  .app-shell { width: calc(100vw - 24px); }
   .masthead-row { padding-inline: 24px; }
   .masthead-row h1 { font-size: 44px; }
   .policy-heading { padding-inline: 24px; }
@@ -517,15 +524,13 @@ input[type="number"]::-webkit-outer-spin-button { margin: 0; appearance: none; }
 }
 
 @media (max-width: 560px) {
-  body { display: block; padding: 0; background: var(--paper); }
-  .app-shell { width: 100%; min-height: 100vh; border: 0; }
   .masthead-row { padding-inline: 14px; }
   .masthead-row h1 { font-size: 42px; }
   .policy-heading { min-height: 94px; padding: 22px 14px 18px; }
   .policy-heading p { font-size: 12px; }
   .notice { padding-inline: 14px; }
   .strategy-shell { grid-template-columns: 62px minmax(0, 1fr); }
-  .mode-tab { height: 178px; }
+  .mode-tab { min-height: 178px; }
   .mode-tab strong { font-size: 12px; }
   .mode-tab small { font-size: 7px; }
   .route-row { padding-inline: 8px; }

@@ -107,6 +107,21 @@ try {
   const failures = [];
 
   await loadPreview();
+  try {
+    assert.equal(
+      await evaluate(`(() => {
+        const rect = document.querySelector('.app-shell').getBoundingClientRect();
+        return rect.top === 0 && rect.left === 0
+          && Math.round(rect.width) === document.documentElement.clientWidth
+          && rect.height >= document.documentElement.clientHeight;
+      })()`),
+      true,
+      '应用外壳应完整填充浏览器视口',
+    );
+  } catch (error) {
+    failures.push(error);
+  }
+
   await evaluate(`document.querySelector('.refresh-button').click()`);
   await waitFor(`document.querySelector('.notice')?.textContent.includes('状态与策略已刷新。')`);
   try {

@@ -34,7 +34,7 @@ typography:
 rounded:
   square: "0"
 spacing:
-  window: "960px"
+  window: "100vw × 100dvh"
   inset: "32px"
   compact: "8px"
 components:
@@ -58,7 +58,7 @@ components:
 
 **Creative North Star: “The Compact Policy Console”**
 
-IdleFlow is a centered 960px desktop utility, not a dashboard or document. A black title bar frames a compact strategy editor: a narrow power-mode rail, two equal timelines, and one low action bar. The interface stays monochrome, square, and deliberately quiet so timing order is immediately legible.
+IdleFlow is a full-window desktop utility, not a dashboard or document. A black title bar frames a compact strategy editor: a narrow power-mode rail, two equal timelines, and one low action bar. The interface stays monochrome, square, and deliberately quiet so timing order is immediately legible.
 
 ## Colors
 
@@ -76,7 +76,7 @@ The wide, heavy CJK-capable sans carries the `IDLEFLOW` wordmark and interface c
 
 ## Layout
 
-At desktop widths the app is a centered `960px` window on a subtle 24px technical grid. The title bar is `64px`, policy heading `104px`, power rail `80px`, each policy row `178px`, and action bar at least `56px`. Battery and AC remain simultaneously visible; the active mode uses ink while the inactive mode recedes in gray. Below `820px`, insets and controls compress. Below `560px`, the window fills the viewport while preserving the two-timeline comparison.
+The app fills `100vw × 100dvh`. The title bar is `64px`, policy heading `104px`, power rail `80px`, and action bar at least `56px`. The remaining height belongs to the strategy area: battery and AC rows split it equally while each retains a `178px` minimum. Both profiles remain simultaneously visible; the active mode uses ink while the inactive mode recedes in gray. Below `820px`, insets and controls compress. Below `560px`, labels simplify while the two-timeline comparison remains intact.
 
 ## Components
 
