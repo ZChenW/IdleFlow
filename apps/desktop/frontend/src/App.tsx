@@ -257,7 +257,7 @@ function PolicyTimeline({
   return (
     <section
       className={`route-row ${profileKey} ${active ? 'active' : ''}`}
-      aria-label={`${sourceLabel}空闲策略`}
+      aria-label={`${sourceLabel}策略`}
       onFocusCapture={onActivate}
     >
       <button className="route-source" type="button" onClick={onActivate} aria-pressed={active}>
@@ -361,22 +361,25 @@ export default function App() {
       </header>
 
       <div className="editorial-grid">
-        <aside className="operations-rail">
-          <section className="rail-section ownership-section">
+        <section className="system-status-strip" aria-labelledby="system-status-heading">
+          <div className="status-overview">
             <div className="section-heading">
-              <h2>系统状态</h2>
+              <h2 id="system-status-heading">系统状态</h2>
               <span className={`state-mark ${status.enabled ? 'managed' : ''}`} aria-hidden="true" />
             </div>
             <p className="owner-statement">
               {status.enabled ? 'IdleFlow 正在管理' : '原有策略正在运行'}
             </p>
-            <dl className="status-list">
-              <div><dt>模式</dt><dd>{status.enabled ? '已接管' : '观察中'}</dd></div>
-              <div><dt>电源</dt><dd>{activeSource}</dd></div>
-              <div><dt>阻止器</dt><dd>{status.inhibited ? '临时阻止' : '正常执行'}</dd></div>
-              {status.managed_swayidle_pid && <div><dt>进程</dt><dd>{status.managed_swayidle_pid}</dd></div>}
-            </dl>
+          </div>
 
+          <dl className="status-list">
+            <div><dt>模式</dt><dd>{status.enabled ? '已接管' : '观察中'}</dd></div>
+            <div><dt>电源</dt><dd>{activeSource}</dd></div>
+            <div><dt>阻止器</dt><dd>{status.inhibited ? '临时阻止' : '正常执行'}</dd></div>
+            {status.managed_swayidle_pid && <div><dt>进程</dt><dd>{status.managed_swayidle_pid}</dd></div>}
+          </dl>
+
+          <div className="status-actions">
             {!status.enabled ? (
               <button
                 className="rail-action takeover-button"
@@ -389,7 +392,10 @@ export default function App() {
                 <ArrowIcon /><span><strong>接管策略</strong><small>切换所有权</small></span>
               </button>
             ) : (
-              <div className="managed-stamp"><ShieldIcon /><span><strong>已接管</strong><small>锁屏保护生效</small></span></div>
+              <div className="managed-stamp">
+                <span className="managed-stamp__icon"><ShieldIcon /></span>
+                <span><strong>已接管</strong><small>锁屏保护生效</small></span>
+              </div>
             )}
 
             <button
@@ -404,53 +410,41 @@ export default function App() {
               <PauseIcon />
               <span>{status.inhibited ? '恢复策略' : status.enabled ? '临时阻止' : '接管后可用'}</span>
             </button>
-          </section>
 
-          <section className="rail-section safety-section">
-            <div className="section-heading"><h2>安全链</h2><LockIcon /></div>
-            <p>自动挂起前必须确认锁屏成功。</p>
-            <div className="lock-chain" aria-label="锁屏后端回退顺序：首选 QuickShell，备用 swaylock">
-              <span><small>首选</small>QuickShell</span>
-              <ArrowIcon />
-              <span><small>备用</small>swaylock</span>
-            </div>
-            <p className="safety-copy">QuickShell 不可用时回退到 swaylock；两者都失败才取消挂起。</p>
-            <div className="safety-actions">
+            <button
+              className="secondary-button"
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                setMessage(null);
+                try {
+                  await api.lock();
+                  setMessage('锁屏请求已发送。');
+                } catch (error) {
+                  setMessage(`操作未完成：${String(error)}`);
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              测试锁屏
+            </button>
+            {status.enabled && (
               <button
-                className="secondary-button"
+                className="secondary-button rollback-button"
                 disabled={busy}
-                onClick={async () => {
-                  setBusy(true);
-                  setMessage(null);
-                  try {
-                    await api.lock();
-                    setMessage('锁屏请求已发送。');
-                  } catch (error) {
-                    setMessage(`操作未完成：${String(error)}`);
-                  } finally {
-                    setBusy(false);
-                  }
-                }}
+                onClick={() => void run(api.rollback, '已回退。原有桌面休眠策略重新接管。')}
               >
-                测试锁屏
+                回退原策略
               </button>
-              {status.enabled && (
-                <button
-                  className="secondary-button rollback-button"
-                  disabled={busy}
-                  onClick={() => void run(api.rollback, '已回退。原有桌面休眠策略重新接管。')}
-                >
-                  回退原策略
-                </button>
-              )}
-            </div>
-          </section>
-        </aside>
+            )}
+          </div>
+        </section>
 
         <section className="policy-sheet">
           <div className="policy-heading">
             <div>
-              <h2>空闲策略</h2>
+              <h2>策略</h2>
               <p>按顺序设置锁屏、熄屏与挂起的等待时间。</p>
             </div>
             <div className={`change-flag ${hasChanges ? 'changed' : ''}`}>
@@ -470,7 +464,7 @@ export default function App() {
 
           <div className="timeline-scale" aria-hidden="true">
             <span>策略 / 分钟</span>
-            <div><i>执行顺序</i><b>LOCK</b><b>DISPLAY</b><b>SUSPEND</b></div>
+            <div><b>LOCK</b><b>DISPLAY</b><b>SUSPEND</b></div>
           </div>
 
           <div className="policy-timelines">

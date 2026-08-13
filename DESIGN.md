@@ -20,7 +20,7 @@ typography:
     letterSpacing: "-0.04em"
   headline:
     fontFamily: "Noto Sans CJK SC, system-ui, sans-serif"
-    fontSize: "clamp(30px, 4.4vw, 58px)"
+    fontSize: "clamp(28px, 3vw, 44px)"
     fontWeight: 820
     lineHeight: 0.95
     letterSpacing: "-0.04em"
@@ -93,7 +93,7 @@ The palette is nearly monochrome: paper and ink carry the system, cool neutrals 
 The display face supplies the masthead's editorial authority. Body CJK remains practical and highly legible. Maple Mono is reserved for measurements, English stage codes, process data, and terse labels—not general prose.
 
 - **Display** (900, `clamp(4rem, 12vw, 6rem)`, .78): `IDLEFLOW` and loading identity only.
-- **Headline** (820, `clamp(30px, 4.4vw, 58px)`, .95): primary policy title.
+- **Headline** (820, `clamp(28px, 3vw, 44px)`, .95): primary policy title.
 - **Title** (750–820, 15–40px): rail statements, profile names, section titles.
 - **Body** (10–12px, 1.45–1.55): operational explanation and recovery copy.
 - **Data/Label** (600, 7–13px): minutes, status facts, stage codes, and index notation.
@@ -102,7 +102,7 @@ The display face supplies the masthead's editorial authority. Body CJK remains p
 
 ## Layout
 
-Desktop uses an editorial masthead followed by a 3/9 operations-to-policy grid. Refresh occupies the masthead's top-right support position; Runtime status facts stay in the operations rail. The policy sheet gives both power profiles equal horizontal timelines. The responsive system changes at 900px, 680px, and 460px: density reduces first, then the operations rail becomes two columns, and finally all regions stack. The reading order stays ownership → safety → policy → save. The outer gutter is `clamp(16px, 2vw, 30px)`.
+Desktop uses an editorial masthead followed by a horizontal system-status strip and a full-width policy sheet. Refresh occupies the masthead's top-right support position; ownership, Runtime facts, and operational controls share the status strip. The policy sheet gives both power profiles equal horizontal timelines. The responsive system changes at 900px, 680px, and 460px: the strip wraps its actions first, then status regions stack, and finally policy controls simplify. The reading order stays ownership → status/actions → policy → save. The outer gutter is `clamp(16px, 2vw, 30px)`.
 
 ## Elevation & Depth
 
