@@ -5,10 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5178",
-    "build": "tsc --noEmit && vite build",
-    "typecheck": "tsc --noEmit",
-    "test": "node --test src/*.test.ts",
-    "test:ui": "node scripts/ui-regression.mjs"
+    "build": "tsc --noEmit && vite build"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.11.0",

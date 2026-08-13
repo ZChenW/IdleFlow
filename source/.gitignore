@@ -5,5 +5,4 @@
 /apps/desktop/frontend/vite.config.js
 /apps/desktop/frontend/vite.config.d.ts
 /apps/desktop/src-tauri/gen
-.impeccable/
 *.log

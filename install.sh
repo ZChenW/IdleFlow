@@ -2,16 +2,16 @@
 
 set -euo pipefail
 
-readonly repository="ZChenW/IdleFlow"
-readonly source_revision="694627e5692e327dbd0793b379e522b05d85cedb"
 readonly prefix="$HOME/.local"
+readonly repository_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+readonly source_dir="$repository_root/source"
 
 fail() {
     printf 'IdleFlow installer: %s\n' "$*" >&2
     exit 1
 }
 
-required_commands=(busctl cargo cc curl install npm pkg-config swayidle systemctl tar)
+required_commands=(busctl cargo cc install npm pkg-config swayidle systemctl)
 missing_commands=()
 for command_name in "${required_commands[@]}"; do
     if ! command -v "$command_name" >/dev/null 2>&1; then
@@ -27,19 +27,9 @@ if ! command -v qs >/dev/null 2>&1 && ! command -v swaylock >/dev/null 2>&1; the
     fail "install QuickShell (qs) or swaylock before installing IdleFlow"
 fi
 
-temporary_dir="$(mktemp -d)"
-trap 'rm -rf -- "$temporary_dir"' EXIT
-
-archive="$temporary_dir/idleflow-source.tar.gz"
-source_dir="$temporary_dir/source"
-mkdir -p "$source_dir"
-
-printf 'Fetching IdleFlow source %s...\n' "${source_revision:0:8}"
-curl --fail --location --proto '=https' --tlsv1.2 \
-    --retry 3 --retry-delay 1 \
-    --output "$archive" \
-    "https://github.com/${repository}/archive/${source_revision}.tar.gz"
-tar -xzf "$archive" --strip-components=1 -C "$source_dir"
+if [[ ! -f "$source_dir/Cargo.toml" || ! -f "$source_dir/apps/desktop/frontend/package-lock.json" ]]; then
+    fail "source directory is incomplete; clone the full repository before installing"
+fi
 
 npm --prefix "$source_dir/apps/desktop/frontend" ci --no-audit --no-fund
 npm --prefix "$source_dir/apps/desktop/frontend" run build
