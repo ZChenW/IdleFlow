@@ -117,11 +117,7 @@ try {
   const clearedValue = await evaluate(`document.querySelector('.route-row.battery input[type="number"]').value`);
   try {
     assert.equal(clearedValue, '', '数字字段应允许暂时清空');
-    assert.equal(
-      await evaluate(`document.querySelector('.policy-dial .dial-node.lock span').textContent`),
-      '',
-      '清空输入时圆圈数值也应为空',
-    );
+    assert.equal(clearedValue, '', '清空输入时策略时间线数值也应为空');
     await evaluate(`(() => {
       const input = document.querySelector('.route-row.battery input[type="number"]');
       Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, input.value + '240');
@@ -138,9 +134,9 @@ try {
     })()`);
     await new Promise((resolve) => setTimeout(resolve, 50));
     assert.equal(
-      await evaluate(`document.querySelector('.policy-dial .dial-node.lock span').textContent`),
+      await evaluate(`document.querySelector('.route-row.battery .timeline-value').value`),
       '0',
-      '输入 0 时圆圈应同步显示 0',
+      '输入 0 时策略时间线应同步显示 0',
     );
   } catch (error) {
     failures.push(error);
@@ -148,7 +144,9 @@ try {
 
   await loadPreview();
   const point = await evaluate(`(() => {
-    const rect = document.querySelector('.route-row.ac .route-stage:nth-child(2) .stage-name').getBoundingClientRect();
+    const target = document.querySelector('.route-row.ac .route-stage:nth-child(2) .stage-name');
+    target.scrollIntoView({ block: 'center' });
+    const rect = target.getBoundingClientRect();
     return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
   })()`);
   await cdp('Input.dispatchMouseEvent', { type: 'mouseMoved', x: point.x, y: point.y });

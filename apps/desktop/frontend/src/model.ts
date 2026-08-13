@@ -36,25 +36,3 @@ export function statusLabel(status: RuntimeStatus): string {
   if (status.enabled && status.last_error) return '已启用 · 等待处理冲突';
   return '观察模式';
 }
-
-export function validateProfile(profile: Profile): string | null {
-  if (profile.lock_after_seconds < 30) return '锁屏时间不能少于 30 秒';
-  if (profile.display_off_after_seconds <= profile.lock_after_seconds) {
-    return '熄屏时间必须晚于锁屏时间';
-  }
-  if (
-    profile.suspend_after_seconds !== null &&
-    profile.suspend_after_seconds <= profile.display_off_after_seconds
-  ) {
-    return '挂起时间必须晚于熄屏时间';
-  }
-  return null;
-}
-
-export function minutes(seconds: number): number {
-  return Math.round(seconds / 60);
-}
-
-export function fromMinutes(value: number): number {
-  return Math.max(0, Math.round(value)) * 60;
-}
