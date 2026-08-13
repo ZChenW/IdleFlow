@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react';
 
 import { api } from './api';
 import {
-  statusLabel,
   type Profile,
   type Snapshot,
 } from './model';
@@ -305,12 +304,12 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(() => previewNotice());
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (announce = false) => {
     try {
       const next = await api.snapshot();
       setSnapshot(next);
       setPolicyDraft(PolicyDraft.from(next.policy));
-      setMessage(previewNotice());
+      setMessage(announce ? '状态与策略已刷新。' : previewNotice());
     } catch (error) {
       setMessage(`无法连接 idled。请确认用户服务正在运行，然后重试。\n${String(error)}`);
     }
@@ -343,7 +342,6 @@ export default function App() {
 
   const { status } = snapshot;
   const activeSource = status.power_source === 'battery' ? '电池' : status.power_source === 'ac' ? '交流电' : '未知';
-  const owner = status.enabled ? 'IdleFlow' : status.external_swayidle_detected ? 'swayidle' : '未检测到';
   const notice = status.last_error ?? validation ?? message;
   const noticeKind = status.last_error || validation || message?.startsWith('操作未完成') ? 'error' : 'success';
 
@@ -356,14 +354,7 @@ export default function App() {
       <header className="editorial-header">
         <div className="masthead-row">
           <h1>IDLEFLOW</h1>
-          <p>Idle policy desk <span>/</span> Linux Wayland</p>
-        </div>
-
-        <div className="status-ledger" aria-label="当前运行状态">
-          <div><small>POWER</small><strong>{activeSource}</strong></div>
-          <div><small>OWNER</small><strong>{owner}</strong></div>
-          <div><small>MODE</small><strong>{statusLabel(status)}</strong></div>
-          <button className="refresh-button" onClick={() => void refresh()} disabled={busy}>
+          <button className="refresh-button" onClick={() => void refresh(true)} disabled={busy}>
             <RefreshIcon /><span>刷新</span>
           </button>
         </div>

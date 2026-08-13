@@ -107,6 +107,18 @@ try {
   const failures = [];
 
   await loadPreview();
+  await evaluate(`document.querySelector('.refresh-button').click()`);
+  await waitFor(`document.querySelector('.notice')?.textContent.includes('状态与策略已刷新。')`);
+  try {
+    assert.equal(
+      await evaluate(`document.querySelector('.notice').textContent.includes('状态与策略已刷新。')`),
+      true,
+      '手动刷新后应显示成功通知栏',
+    );
+  } catch (error) {
+    failures.push(error);
+  }
+
   await evaluate(`(() => {
     const input = document.querySelector('.route-row.battery input[type="number"]');
     input.focus();

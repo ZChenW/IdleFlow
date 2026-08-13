@@ -102,7 +102,7 @@ The display face supplies the masthead's editorial authority. Body CJK remains p
 
 ## Layout
 
-Desktop uses an editorial header followed by a 3/9 operations-to-policy grid. The status ledger is one horizontal ruled band; the policy sheet gives both power profiles equal horizontal timelines. The responsive system changes at 900px, 680px, and 460px: density reduces first, then the operations rail becomes two columns, and finally all regions stack. The reading order stays ownership → safety → policy → save. The outer gutter is `clamp(16px, 2vw, 30px)`.
+Desktop uses an editorial masthead followed by a 3/9 operations-to-policy grid. Refresh occupies the masthead's top-right support position; Runtime status facts stay in the operations rail. The policy sheet gives both power profiles equal horizontal timelines. The responsive system changes at 900px, 680px, and 460px: density reduces first, then the operations rail becomes two columns, and finally all regions stack. The reading order stays ownership → safety → policy → save. The outer gutter is `clamp(16px, 2vw, 30px)`.
 
 ## Elevation & Depth
 
@@ -126,10 +126,6 @@ Corners are square. Structural divisions use one-pixel rules; two pixels are res
 ### Inputs / Fields
 
 Minute inputs are square two-cell ledgers: a large centered tabular value plus a narrow `MIN/OFF` unit cell. Focus draws inside the field so the timeline geometry does not jump. Disabled fields use the selection wash and muted ink.
-
-### Status Ledger
-
-Each fact pairs a compact monospaced English key with a stronger Chinese value. Divisions are structural rules, never cards.
 
 ### Policy Timeline
 
