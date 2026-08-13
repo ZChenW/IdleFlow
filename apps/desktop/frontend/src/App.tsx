@@ -120,22 +120,6 @@ function CloseIcon() {
   );
 }
 
-function ArrowIcon() {
-  return (
-    <LineIcon>
-      <path d="M4 12h16M15 7l5 5-5 5" />
-    </LineIcon>
-  );
-}
-
-function PauseIcon() {
-  return (
-    <LineIcon>
-      <path d="M8 5v14M16 5v14" />
-    </LineIcon>
-  );
-}
-
 function StageIcon({ stage }: { stage: StageKey }) {
   if (stage === 'lock') return <LockIcon />;
   if (stage === 'display') return <DisplayIcon />;
@@ -341,7 +325,6 @@ export default function App() {
   const { policy: draft, inputValues, validation, dirty: hasChanges } = policyDraft.view;
 
   const { status } = snapshot;
-  const activeSource = status.power_source === 'battery' ? '电池' : status.power_source === 'ac' ? '交流电' : '未知';
   const notice = status.last_error ?? validation ?? message;
   const noticeKind = status.last_error || validation || message?.startsWith('操作未完成') ? 'error' : 'success';
 
@@ -361,86 +344,6 @@ export default function App() {
       </header>
 
       <div className="editorial-grid">
-        <section className="system-status-strip" aria-labelledby="system-status-heading">
-          <div className="status-overview">
-            <div className="section-heading">
-              <h2 id="system-status-heading">系统状态</h2>
-              <span className={`state-mark ${status.enabled ? 'managed' : ''}`} aria-hidden="true" />
-            </div>
-            <p className="owner-statement">
-              {status.enabled ? 'IdleFlow 正在管理' : '原有策略正在运行'}
-            </p>
-          </div>
-
-          <dl className="status-list">
-            <div><dt>模式</dt><dd>{status.enabled ? '已接管' : '观察中'}</dd></div>
-            <div><dt>电源</dt><dd>{activeSource}</dd></div>
-            <div><dt>阻止器</dt><dd>{status.inhibited ? '临时阻止' : '正常执行'}</dd></div>
-            {status.managed_swayidle_pid && <div><dt>进程</dt><dd>{status.managed_swayidle_pid}</dd></div>}
-          </dl>
-
-          <div className="status-actions">
-            {!status.enabled ? (
-              <button
-                className="rail-action takeover-button"
-                disabled={busy || validation !== null}
-                onClick={() => void run(async () => {
-                  if (hasChanges) await api.save(draft);
-                  return api.takeOver();
-                }, '接管完成。当前编辑的策略已保存并开始生效。')}
-              >
-                <ArrowIcon /><span><strong>接管策略</strong><small>切换所有权</small></span>
-              </button>
-            ) : (
-              <div className="managed-stamp">
-                <span className="managed-stamp__icon"><ShieldIcon /></span>
-                <span><strong>已接管</strong><small>锁屏保护生效</small></span>
-              </div>
-            )}
-
-            <button
-              className={`rail-action inhibit-button ${status.inhibited ? 'active' : ''}`}
-              disabled={busy || !status.enabled}
-              title={!status.enabled ? '接管后才能临时阻止空闲动作' : undefined}
-              onClick={() => void run(
-                () => api.inhibited(!status.inhibited),
-                status.inhibited ? '已恢复按时间执行空闲动作。' : '已临时阻止按时间执行的空闲动作。',
-              )}
-            >
-              <PauseIcon />
-              <span>{status.inhibited ? '恢复策略' : status.enabled ? '临时阻止' : '接管后可用'}</span>
-            </button>
-
-            <button
-              className="secondary-button"
-              disabled={busy}
-              onClick={async () => {
-                setBusy(true);
-                setMessage(null);
-                try {
-                  await api.lock();
-                  setMessage('锁屏请求已发送。');
-                } catch (error) {
-                  setMessage(`操作未完成：${String(error)}`);
-                } finally {
-                  setBusy(false);
-                }
-              }}
-            >
-              测试锁屏
-            </button>
-            {status.enabled && (
-              <button
-                className="secondary-button rollback-button"
-                disabled={busy}
-                onClick={() => void run(api.rollback, '已回退。原有桌面休眠策略重新接管。')}
-              >
-                回退原策略
-              </button>
-            )}
-          </div>
-        </section>
-
         <section className="policy-sheet">
           <div className="policy-heading">
             <div>

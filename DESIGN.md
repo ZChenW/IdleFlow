@@ -102,7 +102,7 @@ The display face supplies the masthead's editorial authority. Body CJK remains p
 
 ## Layout
 
-Desktop uses an editorial masthead followed by a horizontal system-status strip and a full-width policy sheet. Refresh occupies the masthead's top-right support position; ownership, Runtime facts, and operational controls share the status strip. The policy sheet gives both power profiles equal horizontal timelines. The responsive system changes at 900px, 680px, and 460px: the strip wraps its actions first, then status regions stack, and finally policy controls simplify. The reading order stays ownership → status/actions → policy → save. The outer gutter is `clamp(16px, 2vw, 30px)`.
+Desktop uses an editorial masthead followed directly by a full-width policy sheet. Refresh occupies the masthead's top-right support position, while operational status and maintenance controls stay outside this deliberately focused editing surface. The policy sheet gives both power profiles equal horizontal timelines. The responsive system changes at 900px, 680px, and 460px: timeline density reduces first, then labels simplify, and finally policy regions stack. The reading order stays policy → profiles → save. The outer gutter is `clamp(16px, 2vw, 30px)`.
 
 ## Elevation & Depth
 

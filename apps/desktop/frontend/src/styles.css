@@ -160,126 +160,6 @@ input[type="number"]::-webkit-outer-spin-button { margin: 0; appearance: none; }
   padding: 0 var(--gutter);
 }
 
-.system-status-strip {
-  display: grid;
-  grid-template-columns: minmax(220px, 1.15fr) minmax(280px, 1.4fr) minmax(420px, 2fr);
-  align-items: stretch;
-  border-bottom: 1px solid var(--ink);
-}
-
-.status-overview {
-  padding: 14px 18px 14px 0;
-  border-inline-end: 1px solid var(--ink);
-}
-
-.section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 9px;
-  border-bottom: 1px solid var(--ink);
-}
-
-.section-heading h2 {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 780;
-  letter-spacing: -.02em;
-}
-
-.state-mark {
-  width: 11px;
-  height: 11px;
-  border: 1px solid var(--ink);
-}
-
-.state-mark.managed { background: var(--ink); }
-
-.owner-statement {
-  margin: 10px 0 0;
-  font-size: clamp(18px, 2vw, 28px);
-  font-weight: 820;
-  letter-spacing: -.035em;
-  line-height: 1.02;
-}
-
-.status-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-content: center;
-  gap: 0 16px;
-  margin: 0;
-  padding: 14px 18px;
-  border-inline-end: 1px solid var(--ink);
-}
-.status-list > div {
-  display: grid;
-  grid-template-columns: 50px minmax(0, 1fr);
-  gap: 8px;
-  padding: 6px 0;
-  border-top: 1px dotted var(--rule);
-}
-.status-list > div:last-child { border-bottom: 1px dotted var(--rule); }
-.status-list dt,
-.status-list dd { margin: 0; font-size: 11px; }
-.status-list dt { color: var(--muted); }
-.status-list dd { overflow-wrap: anywhere; text-align: right; font-family: var(--mono); }
-
-.rail-action,
-.managed-stamp,
-.secondary-button {
-  min-height: 44px;
-  border: 1px solid var(--ink);
-  border-radius: 0;
-  background: transparent;
-}
-
-.rail-action,
-.managed-stamp {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 11px;
-  text-align: left;
-}
-
-.rail-action { cursor: pointer; }
-.rail-action:hover:not(:disabled),
-.rail-action.active { color: var(--paper); background: var(--ink); }
-.rail-action strong,
-.managed-stamp strong { display: block; font-size: 12px; }
-.rail-action small,
-.managed-stamp small { display: block; margin-top: 2px; color: currentColor; font-size: 9px; }
-.status-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(120px, 1fr));
-  align-content: center;
-  gap: 8px;
-  padding: 14px 0 14px 18px;
-}
-.managed-stamp {
-  display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-.managed-stamp__icon {
-  display: grid;
-  width: 44px;
-  height: 44px;
-  place-items: center;
-  color: var(--paper);
-  background: var(--ink);
-}
-.managed-stamp__icon .line-icon { width: 22px; height: 22px; }
-.inhibit-button { justify-content: center; margin-top: 0; font-size: 12px; font-weight: 750; }
-.secondary-button { padding: 7px 9px; cursor: pointer; font-size: 10px; font-weight: 750; }
-.secondary-button:hover:not(:disabled) { color: var(--paper); background: var(--ink); }
-.rollback-button { border-color: var(--muted); }
-
 .policy-sheet { min-width: 0; padding: 20px 0 0; }
 
 .policy-heading {
@@ -583,14 +463,6 @@ input[type="number"]::-webkit-outer-spin-button { margin: 0; appearance: none; }
 
 @media (max-width: 900px) {
   .masthead-row { min-height: 112px; }
-  .system-status-strip { grid-template-columns: 1fr 1.25fr; }
-  .status-list { border-inline-end: 0; }
-  .status-actions {
-    grid-column: 1 / -1;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    padding: 12px 0;
-    border-top: 1px solid var(--ink);
-  }
   .route-row,
   .timeline-scale { grid-template-columns: 104px minmax(0, 1fr); }
   .route-source { padding-right: 8px; }
@@ -609,11 +481,6 @@ input[type="number"]::-webkit-outer-spin-button { margin: 0; appearance: none; }
   .masthead-row h1 { font-size: clamp(3.15rem, 18vw, 5rem); }
   .masthead-row .refresh-button { min-width: 74px; min-height: 42px; }
   .editorial-grid { padding-inline: 14px; }
-  .system-status-strip { display: block; }
-  .status-overview { padding: 14px 0; border-inline-end: 0; border-bottom: 1px solid var(--ink); }
-  .owner-statement { font-size: 22px; }
-  .status-list { padding: 12px 0; }
-  .status-actions { grid-template-columns: 1fr 1fr; padding: 12px 0; }
   .policy-heading h2 { font-size: 34px; }
   .timeline-scale { display: none; }
   .policy-timelines { margin-top: 18px; }
