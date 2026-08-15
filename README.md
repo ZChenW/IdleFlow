@@ -34,3 +34,12 @@ current idle policy. After installation, open `idle-control-desktop` or run:
 ```bash
 idlectl status
 ```
+
+## Interface notes
+
+The desktop UI follows a deliberate black-and-paper editorial style and is
+**light-only by design** (`color-scheme: light`); it does not follow the system
+dark theme. The layout stays minimal: when IdleFlow owns the idle policy the
+interface shows nothing extra; only in observe mode does a slim banner appear
+with the **接管当前策略** action. **回退原策略** and **测试锁屏** live as quiet
+text buttons in the footer.

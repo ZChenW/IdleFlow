@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type CSSProperties, type ReactNode } 
 
 import { api } from './api';
 import {
+  statusLabel,
   type Profile,
   type Snapshot,
 } from './model';
@@ -21,10 +22,22 @@ const stageMeta: Record<StageKey, { label: string; english: string }> = {
   suspend: { label: '挂起', english: 'SUSPEND' },
 };
 
-function previewNotice(): string | null {
+const profileMeta: Record<ProfileKey, { label: string; english: string }> = {
+  battery: { label: '电池', english: 'ON BATTERY' },
+  ac: { label: '交流电', english: 'PLUGGED IN' },
+};
+
+interface UiMessage {
+  text: string;
+  kind: 'error' | 'success';
+}
+
+function previewNotice(): UiMessage | null {
   const notice = new URLSearchParams(window.location.search).get('notice');
-  if (notice === 'success') return '策略已保存。所有权状态没有改变。';
-  if (notice === 'error') return '操作未完成：无法确认锁屏状态，请检查 QuickShell 或 swaylock。';
+  if (notice === 'success') return { text: '策略已保存。所有权状态没有改变。', kind: 'success' };
+  if (notice === 'error') {
+    return { text: '操作未完成：无法确认锁屏状态，请检查 QuickShell 或 swaylock。', kind: 'error' };
+  }
   return null;
 }
 
@@ -126,6 +139,10 @@ function StageIcon({ stage }: { stage: StageKey }) {
   return <SleepIcon />;
 }
 
+function ProfileIcon({ profileKey }: { profileKey: ProfileKey }) {
+  return profileKey === 'battery' ? <BatteryIcon /> : <PlugIcon />;
+}
+
 function policyValue(profile: Profile, stage: StageKey): number | null {
   if (stage === 'lock') return profile.lock_after_seconds;
   if (stage === 'display') return profile.display_off_after_seconds;
@@ -139,9 +156,9 @@ const sliderBounds: Record<ProfileKey, Record<StageKey, { min: number; max: numb
     suspend: { min: 5, max: 120, step: 1 },
   },
   ac: {
-    lock: { min: 1, max: 240, step: 5 },
-    display: { min: 1, max: 300, step: 5 },
-    suspend: { min: 5, max: 480, step: 5 },
+    lock: { min: 1, max: 240, step: 1 },
+    display: { min: 1, max: 300, step: 1 },
+    suspend: { min: 5, max: 480, step: 1 },
   },
 };
 
@@ -157,10 +174,11 @@ function Toggle({ checked, onChange, label, disabled = false }: {
         type="checkbox"
         checked={checked}
         disabled={disabled}
+        aria-label={label}
         onChange={(event) => onChange(event.target.checked)}
       />
       <span aria-hidden="true"><i /></span>
-      <b>{label}</b>
+      <b aria-hidden="true">{label}</b>
     </label>
   );
 }
@@ -171,6 +189,7 @@ function TimelineStage({
   profile,
   selected,
   inputValue,
+  disabled,
   onSelect,
   onInputValueChange,
   onInputBlur,
@@ -181,6 +200,7 @@ function TimelineStage({
   profile: Profile;
   selected: boolean;
   inputValue: string;
+  disabled: boolean;
   onSelect: () => void;
   onInputValueChange: (value: string) => void;
   onInputBlur: () => void;
@@ -198,7 +218,6 @@ function TimelineStage({
   return (
     <div className={`route-stage ${selected ? 'selected' : ''} ${!enabled ? 'dormant' : ''}`} style={stageStyle}>
       <button className="stage-name" type="button" onClick={onSelect} aria-pressed={selected}>
-        <span className="stage-index" aria-hidden="true">0{stages.indexOf(stage) + 1}</span>
         <StageIcon stage={stage} />
         <span>
           <strong>{stageMeta[stage].label}</strong>
@@ -212,9 +231,9 @@ function TimelineStage({
         min={bounds.min}
         max={bounds.max}
         step={bounds.step}
-        disabled={!enabled}
+        disabled={!enabled || disabled}
         value={Math.min(bounds.max, Math.max(bounds.min, minutesValue))}
-        aria-label={`${profileKey === 'battery' ? '电池' : '交流电'}模式${stageMeta[stage].label}时间`}
+        aria-label={`${profileMeta[profileKey].label}模式${stageMeta[stage].label}时间`}
         onFocus={onSelect}
         onChange={(event) => onInputValueChange(event.target.value)}
       />
@@ -226,7 +245,7 @@ function TimelineStage({
           className="timeline-value"
           type="number"
           min="0"
-          disabled={!enabled}
+          disabled={!enabled || disabled}
           value={inputValue}
           onFocus={onSelect}
           onBlur={onInputBlur}
@@ -239,6 +258,7 @@ function TimelineStage({
         <Toggle
           checked={enabled}
           label={enabled ? '自动挂起开启' : '自动挂起关闭'}
+          disabled={disabled}
           onChange={onToggleSuspend}
         />
       )}
@@ -250,6 +270,7 @@ function PolicyTimeline({
   profileKey,
   profile,
   active,
+  disabled,
   inputValues,
   selectedStage,
   onActivate,
@@ -261,6 +282,7 @@ function PolicyTimeline({
   profileKey: ProfileKey;
   profile: Profile;
   active: boolean;
+  disabled: boolean;
   inputValues: ProfileInputValues;
   selectedStage: StageKey;
   onActivate: () => void;
@@ -269,14 +291,19 @@ function PolicyTimeline({
   onInputBlur: (stage: StageKey) => void;
   onToggleSuspend: (enabled: boolean) => void;
 }) {
-  const sourceLabel = profileKey === 'battery' ? '电池' : '交流电';
+  const meta = profileMeta[profileKey];
 
   return (
     <section
       className={`route-row ${profileKey} ${active ? 'active' : ''}`}
-      aria-label={`${sourceLabel}策略`}
+      aria-label={`${meta.label}策略`}
       onFocusCapture={onActivate}
     >
+      <div className="route-label" aria-hidden="true">
+        <ProfileIcon profileKey={profileKey} />
+        <strong>{meta.label}</strong>
+        <small>{meta.english}</small>
+      </div>
       <div className="route-stages">
         {stages.map((stage) => (
           <TimelineStage
@@ -286,6 +313,7 @@ function PolicyTimeline({
             profile={profile}
             selected={active && selectedStage === stage}
             inputValue={inputValues[stage]}
+            disabled={disabled}
             onSelect={() => { onActivate(); onSelectStage(stage); }}
             onInputValueChange={(value) => onInputValueChange(stage, value)}
             onInputBlur={() => onInputBlur(stage)}
@@ -303,7 +331,7 @@ function LoadingScreen({ message, onRetry }: { message: string | null; onRetry: 
       <div className="loading-rule" aria-hidden="true"><i /></div>
       <h1>IDLEFLOW</h1>
       <p>{message ?? '正在读取休眠策略…'}</p>
-      {message && <button onClick={onRetry}>重新连接</button>}
+      {message && <button className="save-button" onClick={onRetry}>重新连接</button>}
     </main>
   );
 }
@@ -314,16 +342,19 @@ export default function App() {
   const [profileKey, setProfileKey] = useState<ProfileKey>('battery');
   const [selectedStage, setSelectedStage] = useState<StageKey>('lock');
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<string | null>(() => previewNotice());
+  const [message, setMessage] = useState<UiMessage | null>(() => previewNotice());
 
   const refresh = useCallback(async (announce = false) => {
     try {
       const next = await api.snapshot();
       setSnapshot(next);
       setPolicyDraft(PolicyDraft.from(next.policy));
-      setMessage(announce ? '状态与策略已刷新。' : previewNotice());
+      setMessage(announce ? { text: '状态与策略已刷新。', kind: 'success' } : previewNotice());
     } catch (error) {
-      setMessage(`无法连接 idled。请确认用户服务正在运行，然后重试。\n${String(error)}`);
+      setMessage({
+        text: `无法连接 idled。请确认用户服务正在运行，然后重试。\n${String(error)}`,
+        kind: 'error',
+      });
     }
   }, []);
 
@@ -338,23 +369,39 @@ export default function App() {
       const next = await operation();
       setSnapshot(next);
       setPolicyDraft(PolicyDraft.from(next.policy));
-      setMessage(success);
+      setMessage({ text: success, kind: 'success' });
     } catch (error) {
-      setMessage(`操作未完成：${String(error)}`);
+      setMessage({ text: `操作未完成：${String(error)}`, kind: 'error' });
+    } finally {
+      setBusy(false);
+    }
+  }, []);
+
+  const testLock = useCallback(async () => {
+    setBusy(true);
+    setMessage(null);
+    try {
+      await api.lock();
+      setMessage({ text: '已请求锁屏。', kind: 'success' });
+    } catch (error) {
+      setMessage({ text: `操作未完成：${String(error)}`, kind: 'error' });
     } finally {
       setBusy(false);
     }
   }, []);
 
   if (!snapshot || !policyDraft) {
-    return <LoadingScreen message={message} onRetry={() => void refresh()} />;
+    return <LoadingScreen message={message?.text ?? null} onRetry={() => void refresh()} />;
   }
 
   const { policy: draft, inputValues, validation, dirty: hasChanges } = policyDraft.view;
 
   const { status } = snapshot;
-  const notice = status.last_error ?? validation ?? message;
-  const noticeKind = status.last_error || validation || message?.startsWith('操作未完成') ? 'error' : 'success';
+  const notice: UiMessage | null = status.last_error
+    ? { text: status.last_error, kind: 'error' }
+    : validation
+      ? { text: validation, kind: 'error' }
+      : message;
 
   const editPolicy = (event: PolicyDraftEvent) => {
     setPolicyDraft((current) => current?.apply(event) ?? current);
@@ -383,45 +430,37 @@ export default function App() {
             </div>
           </div>
 
+          {!status.enabled && (
+            <aside className="notice mode" role="status">
+              <ShieldIcon />
+              <p>{statusLabel(status)} · 保存不会接管系统</p>
+              <button
+                className="text-button"
+                disabled={busy}
+                onClick={() => void run(() => api.takeOver(), 'IdleFlow 正在管理当前策略。')}
+              >
+                接管当前策略
+              </button>
+            </aside>
+          )}
+
           {notice && (
-            <aside className={`notice ${noticeKind}`} role={noticeKind === 'error' ? 'alert' : 'status'} aria-live="polite">
-              <NoticeIcon kind={noticeKind} />
-              <p>{notice}</p>
-              {message && !validation && (
-                <button onClick={() => setMessage(null)} aria-label="关闭消息"><CloseIcon /></button>
+            <aside className={`notice ${notice.kind}`} role={notice.kind === 'error' ? 'alert' : 'status'} aria-live="polite">
+              <NoticeIcon kind={notice.kind} />
+              <p>{notice.text}</p>
+              {message && !validation && !status.last_error && (
+                <button className="close-button" onClick={() => setMessage(null)} aria-label="关闭消息"><CloseIcon /></button>
               )}
             </aside>
           )}
 
           <div className="strategy-shell">
-            <nav className="mode-sidebar" aria-label="电源模式">
-              <button
-                className={`mode-tab ${profileKey === 'battery' ? 'active' : ''}`}
-                type="button"
-                onClick={() => setProfileKey('battery')}
-                aria-pressed={profileKey === 'battery'}
-              >
-                <BatteryIcon />
-                <strong>电池</strong>
-                <small>ON BATTERY</small>
-              </button>
-              <button
-                className={`mode-tab ${profileKey === 'ac' ? 'active' : ''}`}
-                type="button"
-                onClick={() => setProfileKey('ac')}
-                aria-pressed={profileKey === 'ac'}
-              >
-                <PlugIcon />
-                <strong>交流电</strong>
-                <small>PLUGGED IN</small>
-              </button>
-            </nav>
-
             <div className="policy-timelines">
               <PolicyTimeline
                 profileKey="battery"
                 profile={draft.battery}
                 active={profileKey === 'battery'}
+                disabled={busy}
                 inputValues={inputValues.battery}
                 selectedStage={selectedStage}
                 onActivate={() => setProfileKey('battery')}
@@ -438,6 +477,7 @@ export default function App() {
                 profileKey="ac"
                 profile={draft.ac}
                 active={profileKey === 'ac'}
+                disabled={busy}
                 inputValues={inputValues.ac}
                 selectedStage={selectedStage}
                 onActivate={() => setProfileKey('ac')}
@@ -458,6 +498,25 @@ export default function App() {
               <ShieldIcon />
               <span><strong>遵守应用 inhibitor</strong><small>演示、媒体播放和会议可以延后空闲动作</small></span>
               <span className="fixed-state">固定启用</span>
+            </div>
+            <div className="utility-actions">
+              <button className="text-button" disabled={busy} onClick={() => void testLock()}>
+                测试锁屏
+              </button>
+              <button
+                className="text-button"
+                disabled={busy || !status.enabled}
+                onClick={() => void run(() => api.rollback(), '已回退：IdleFlow 不再接管空闲策略。')}
+              >
+                回退原策略
+              </button>
+              <button
+                className="text-button"
+                disabled={busy || !hasChanges}
+                onClick={() => editPolicy({ type: 'reset' })}
+              >
+                重置
+              </button>
             </div>
             <div className="save-control">
               <span>保存但不改变所有权</span>

@@ -39,10 +39,6 @@ const previewApi = {
     previewSnapshot.policy = structuredClone(policy);
     return previewResult();
   },
-  inhibited: async (inhibited: boolean) => {
-    previewSnapshot.status.inhibited = inhibited;
-    return previewResult();
-  },
   takeOver: async () => {
     previewSnapshot.policy.enabled = true;
     previewSnapshot.status = {
@@ -70,7 +66,6 @@ const previewApi = {
 const tauriApi = {
   snapshot: () => invoke<Snapshot>('get_snapshot'),
   save: (policy: Policy) => invoke<Snapshot>('save_policy', { policy }),
-  inhibited: (inhibited: boolean) => invoke<Snapshot>('set_inhibited', { inhibited }),
   takeOver: () => invoke<Snapshot>('take_over'),
   rollback: () => invoke<Snapshot>('rollback'),
   lock: () => invoke<string>('lock_now'),

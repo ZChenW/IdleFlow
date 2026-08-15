@@ -15,7 +15,8 @@ export interface PolicyDraftView {
 export type PolicyDraftEvent =
   | { readonly type: 'stage-input'; readonly profile: ProfileKey; readonly stage: StageKey; readonly input: string }
   | { readonly type: 'stage-blur'; readonly profile: ProfileKey; readonly stage: StageKey }
-  | { readonly type: 'suspend-toggle'; readonly profile: ProfileKey; readonly enabled: boolean };
+  | { readonly type: 'suspend-toggle'; readonly profile: ProfileKey; readonly enabled: boolean }
+  | { readonly type: 'reset' };
 
 function cloneProfile(profile: Profile): Profile {
   return { ...profile };
@@ -113,6 +114,7 @@ export class PolicyDraft {
   }
 
   apply(event: PolicyDraftEvent): PolicyDraft {
+    if (event.type === 'reset') return PolicyDraft.from(this.#saved);
     if (event.type === 'stage-input') return this.#applyStageInput(event);
     if (event.type === 'stage-blur') return this.#applyStageBlur(event);
     return this.#applySuspendToggle(event);
